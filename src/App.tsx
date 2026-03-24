@@ -142,9 +142,9 @@ export default function App() {
         reader.onerror = reject;
       });
 
-      // 调用 Gemini 3.1 Pro 模型
+      // 调用 Gemini 2.5 Pro 模型
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-2.5-flash',
         contents: {
           parts: [
             {
