@@ -24,7 +24,6 @@ const CopyButton = ({ text, title, className }: { text: string, title: string, c
 };
 
 export default function DeepAnalyzer() {
-  // 【排雷成功】：删除了会导致 Vite 环境白屏崩溃的 process.env 读取，改为空字符串初始状态
   const [apiKey, setApiKey] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
@@ -39,6 +38,7 @@ export default function DeepAnalyzer() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 每次打开网页时，自动从浏览器记忆库里读取 API Key
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
     if (savedKey) {
@@ -107,8 +107,6 @@ export default function DeepAnalyzer() {
       setError('未找到 Gemini API Key。请在左侧控制台输入 API Key。');
       return;
     }
-    
-    localStorage.setItem('gemini_api_key', finalApiKey);
     
     setLoading(true);
     setError('');
@@ -264,9 +262,14 @@ JSON
             <input 
               type="password" 
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setApiKey(val);
+                // 【绝杀修复】：只要你一粘贴，立刻永久存入浏览器记忆库！
+                localStorage.setItem('gemini_api_key', val.trim());
+              }}
               className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors placeholder-slate-400 outline-none border" 
-              placeholder="输入 API Key (若平台已注入则留空)" 
+              placeholder="输入一次，永久自动记住" 
             />
           </div>
 
