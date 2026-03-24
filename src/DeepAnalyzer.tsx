@@ -38,7 +38,6 @@ export default function DeepAnalyzer() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 每次打开网页时，自动从浏览器记忆库里读取 API Key
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
     if (savedKey) {
@@ -107,6 +106,8 @@ export default function DeepAnalyzer() {
       setError('未找到 Gemini API Key。请在左侧控制台输入 API Key。');
       return;
     }
+    
+    localStorage.setItem('gemini_api_key', finalApiKey);
     
     setLoading(true);
     setError('');
@@ -187,8 +188,9 @@ JSON
   ]
 }`;
 
+      // 恢复使用顶级 3.1-pro 模型
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-pro-preview',
         contents: [
           { fileData: { fileUri: fileInfo.uri, mimeType: fileInfo.mimeType } },
           { text: prompt }
@@ -265,7 +267,6 @@ JSON
               onChange={(e) => {
                 const val = e.target.value;
                 setApiKey(val);
-                // 【绝杀修复】：只要你一粘贴，立刻永久存入浏览器记忆库！
                 localStorage.setItem('gemini_api_key', val.trim());
               }}
               className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 transition-colors placeholder-slate-400 outline-none border" 
