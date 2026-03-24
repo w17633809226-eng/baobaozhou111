@@ -6,10 +6,7 @@ import DeepAnalyzer from './DeepAnalyzer';
 // 固定的真实 Token
 const TOKEN = 'oyzilunkdswlzzbgoao5wqylagbbxj';
 
-// 初始化 Gemini AI 客户端 (从环境变量读取 Key)
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+// 【排雷成功】：删除了原本在这里强行初始化的、会导致白屏崩溃的 AI 代码。
 
 export default function App() {
   // 第一步：解析视频状态
@@ -121,6 +118,14 @@ export default function App() {
     setAiResult('');
 
     try {
+      // 【关键修复】：只有在点击提取时，才去读取密码并唤醒 AI
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (!savedKey) {
+        throw new Error('未找到 API Key！请先在网页最下方“第三步”中输入一次你的 Gemini API Key。');
+      }
+
+      const ai = new GoogleGenAI({ apiKey: savedKey });
+
       // 限制文件大小为 50MB，防止纯前端 Base64 转换导致浏览器内存溢出崩溃
       if (selectedFile.size > 50 * 1024 * 1024) {
         throw new Error('视频文件过大（超过 50MB）。为了防止浏览器崩溃，请压缩视频或截取片段后再上传。');
@@ -137,7 +142,7 @@ export default function App() {
         reader.onerror = reject;
       });
 
-      // 调用 Gemini 3.1 Pro 模型 (平台要求使用 3.1-pro-preview 替代 1.5-pro)
+      // 调用 Gemini 3.1 Pro 模型
       const response = await ai.models.generateContent({
         model: 'gemini-3.1-pro-preview',
         contents: {
