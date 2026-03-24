@@ -190,7 +190,7 @@ JSON
 }`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-2.5-flash',
         contents: [
           { fileData: { fileUri: fileInfo.uri, mimeType: fileInfo.mimeType } },
           { text: prompt }
