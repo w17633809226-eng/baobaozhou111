@@ -6,23 +6,18 @@ import DeepAnalyzer from './DeepAnalyzer';
 // 固定的真实 Token
 const TOKEN = 'oyzilunkdswlzzbgoao5wqylagbbxj';
 
-// 【排雷成功】：删除了原本在这里强行初始化的、会导致白屏崩溃的 AI 代码。
-
 export default function App() {
-  // 第一步：解析视频状态
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<any>(null);
 
-  // 第二步：AI 提取状态
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
   const [aiResult, setAiResult] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 处理视频解析
   const handleParse = async () => {
     if (!inputText.trim()) {
       setError('请输入抖音分享口令或链接');
@@ -91,7 +86,6 @@ export default function App() {
     }
   };
 
-  // 处理文件选择
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -106,7 +100,6 @@ export default function App() {
     }
   };
 
-  // 处理 AI 提取
   const handleAIExtract = async () => {
     if (!selectedFile) {
       setAiError('请先选择一个视频文件');
@@ -118,7 +111,6 @@ export default function App() {
     setAiResult('');
 
     try {
-      // 【关键修复】：只有在点击提取时，才去读取密码并唤醒 AI
       const savedKey = localStorage.getItem('gemini_api_key');
       if (!savedKey) {
         throw new Error('未找到 API Key！请先在网页最下方“第三步”中输入一次你的 Gemini API Key。');
@@ -126,25 +118,23 @@ export default function App() {
 
       const ai = new GoogleGenAI({ apiKey: savedKey });
 
-      // 限制文件大小为 50MB，防止纯前端 Base64 转换导致浏览器内存溢出崩溃
       if (selectedFile.size > 50 * 1024 * 1024) {
         throw new Error('视频文件过大（超过 50MB）。为了防止浏览器崩溃，请压缩视频或截取片段后再上传。');
       }
 
-      // 异步读取文件为 Base64
       const reader = new FileReader();
       reader.readAsDataURL(selectedFile);
       const base64Data = await new Promise<string>((resolve, reject) => {
         reader.onloadend = () => {
           const result = reader.result as string;
-          resolve(result.split(',')[1]); // 移除前缀
+          resolve(result.split(',')[1]);
         };
         reader.onerror = reject;
       });
 
-      // 调用 Gemini 2.5 Pro 模型
+      // 恢复使用顶级 3.1-pro 模型
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-pro-preview',
         contents: {
           parts: [
             {
@@ -299,7 +289,6 @@ export default function App() {
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
             
-            {/* 上传区域 */}
             <div className="space-y-4">
               <label className="block text-sm font-medium text-gray-700">
                 上传本地视频 (.mp4)
@@ -341,7 +330,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* 提取按钮 */}
             <button
               onClick={handleAIExtract}
               disabled={aiLoading || !selectedFile}
@@ -360,7 +348,6 @@ export default function App() {
               )}
             </button>
 
-            {/* 错误提示 */}
             {aiError && (
               <div className="rounded-xl bg-red-50 p-4 flex items-start">
                 <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" />
@@ -368,7 +355,6 @@ export default function App() {
               </div>
             )}
 
-            {/* 结果展示 */}
             {aiResult && !aiLoading && (
               <div className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
