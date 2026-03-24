@@ -116,7 +116,7 @@ export default function DeepAnalyzer() {
     setStatus('正在上传视频 (支持最大 200MB)...');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: finalApiKey });
+      const ai = new GoogleGenAI({ apiKey: finalApiKey || 'dummy_key' });
 
       const uploadResult = await ai.files.upload({
         file: file,
