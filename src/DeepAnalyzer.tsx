@@ -24,7 +24,8 @@ const CopyButton = ({ text, title, className }: { text: string, title: string, c
 };
 
 export default function DeepAnalyzer() {
-  const [apiKey, setApiKey] = useState(process.env.GEMINI_API_KEY || '');
+  // 【排雷成功】：删除了会导致 Vite 环境白屏崩溃的 process.env 读取，改为空字符串初始状态
+  const [apiKey, setApiKey] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [script, setScript] = useState('');
@@ -116,7 +117,7 @@ export default function DeepAnalyzer() {
     setStatus('正在上传视频 (支持最大 200MB)...');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: finalApiKey || 'dummy_key' });
+      const ai = new GoogleGenAI({ apiKey: finalApiKey });
 
       const uploadResult = await ai.files.upload({
         file: file,
@@ -189,7 +190,7 @@ JSON
 }`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-pro-preview',
         contents: [
           { fileData: { fileUri: fileInfo.uri, mimeType: fileInfo.mimeType } },
           { text: prompt }
